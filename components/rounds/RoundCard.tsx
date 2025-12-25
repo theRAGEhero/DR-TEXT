@@ -55,7 +55,7 @@ export function RoundCard({ round, onDelete }: RoundCardProps) {
           <div className="flex-1 min-w-0">
             <Link href={`/rounds/${round.id}`} className="min-w-0">
               <CardTitle className="hover:text-primary cursor-pointer line-clamp-2 break-all">
-                {round.name}
+                {round.name || 'TextRound'}
               </CardTitle>
             </Link>
             {round.description && (
@@ -98,7 +98,8 @@ export function RoundCard({ round, onDelete }: RoundCardProps) {
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault()
-                    if (confirm(`Are you sure you want to delete "${round.name}"?`)) {
+                    const label = round.name || 'this TextRound'
+                    if (confirm(`Are you sure you want to delete "${label}"?`)) {
                       onDelete(round.id)
                     }
                   }}

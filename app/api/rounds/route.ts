@@ -32,18 +32,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, description } = body
 
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    if (typeof name !== 'undefined' && typeof name !== 'string') {
       log.warn('Invalid round name provided', { name })
       return NextResponse.json(
-        { error: 'Name is required and must be a non-empty string' },
+        { error: 'Name must be a string when provided' },
         { status: 400 }
       )
     }
 
     const round: TextRound = {
       id: uuidv4(),
-      name: name.trim(),
-      description: description?.trim() || undefined,
+      name: typeof name === 'string' && name.trim().length > 0 ? name.trim() : undefined,
+      description: typeof description === 'string' ? description.trim() || undefined : undefined,
       created_at: new Date().toISOString(),
       status: TextRoundStatus.OPEN,
       message_count: 0

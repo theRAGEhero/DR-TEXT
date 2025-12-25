@@ -37,8 +37,8 @@ export async function PATCH(
     const body = await request.json()
     const updates: Partial<TextRound> = {}
 
-    if (typeof body.name === 'string' && body.name.trim().length > 0) {
-      updates.name = body.name.trim()
+    if (typeof body.name === 'string') {
+      updates.name = body.name.trim() || undefined
     }
     if (typeof body.description === 'string') {
       updates.description = body.description.trim() || undefined

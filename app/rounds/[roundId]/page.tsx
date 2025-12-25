@@ -17,6 +17,9 @@ export default function RoundDetailPage({ params }: { params: { roundId: string 
   const [messages, setMessages] = useState<TextMessage[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [titleInput, setTitleInput] = useState('')
+  const [isSavingTitle, setIsSavingTitle] = useState(false)
+  const [titleError, setTitleError] = useState<string | null>(null)
   const [messageText, setMessageText] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
@@ -32,6 +35,7 @@ export default function RoundDetailPage({ params }: { params: { roundId: string 
       }
       const roundData = await roundResponse.json()
       setRound(roundData.round)
+      setTitleInput(roundData.round.name || '')
 
       const messagesResponse = await fetch(`/api/rounds/${params.roundId}/messages`)
       if (!messagesResponse.ok) {
@@ -51,9 +55,38 @@ export default function RoundDetailPage({ params }: { params: { roundId: string 
     fetchRoundData()
   }, [params.roundId])
 
+  const handleTitleSave = async () => {
+    if (!round) return
+    setTitleError(null)
+    setIsSavingTitle(true)
+
+    try {
+      const response = await fetch(`/api/rounds/${params.roundId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: titleInput })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update title')
+      }
+
+      const data = await response.json()
+      setRound(data.round)
+      setTitleInput(data.round.name || '')
+    } catch (err) {
+      const error = err as Error
+      setTitleError(error.message)
+    } finally {
+      setIsSavingTitle(false)
+    }
+  }
+
   const handleDelete = async () => {
     if (!round) return
-    if (!confirm(`Are you sure you want to delete "${round.name}"?`)) {
+    const label = round.name || 'this TextRound'
+    if (!confirm(`Are you sure you want to delete "${label}"?`)) {
       return
     }
 
@@ -98,6 +131,7 @@ export default function RoundDetailPage({ params }: { params: { roundId: string 
       const data = await response.json()
       setMessages(data.messages)
       setRound(data.round)
+      setTitleInput(data.round.name || '')
       setMessageText('')
     } catch (err) {
       const error = err as Error
@@ -174,12 +208,32 @@ export default function RoundDetailPage({ params }: { params: { roundId: string 
           </Link>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-3 mb-2 min-w-0">
-                <h1 className="text-4xl font-bold break-all">{round.name}</h1>
+              <div className="flex flex-wrap items-center gap-3 mb-3 min-w-0">
+                <div className="flex-1 min-w-[220px]">
+                  <input
+                    value={titleInput}
+                    onChange={(event) => setTitleInput(event.target.value)}
+                    placeholder="Add a title (optional)"
+                    className="w-full bg-transparent text-4xl font-bold tracking-tight text-foreground placeholder:text-muted-foreground border-b border-transparent focus:border-primary/40 focus:outline-none"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTitleSave}
+                  disabled={isSavingTitle}
+                >
+                  {isSavingTitle ? 'Saving...' : 'Save Title'}
+                </Button>
                 <Badge variant={getStatusVariant(round.status)}>
                   {getStatusLabel(round.status)}
                 </Badge>
               </div>
+              {titleError && (
+                <div className="rounded-md bg-destructive/10 p-2 text-xs text-destructive max-w-md">
+                  {titleError}
+                </div>
+              )}
               {round.description && (
                 <p className="text-muted-foreground text-lg">
                   {round.description}

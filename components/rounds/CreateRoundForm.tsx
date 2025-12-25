@@ -13,18 +13,12 @@ interface CreateRoundFormProps {
 export function CreateRoundForm({ onSuccess }: CreateRoundFormProps) {
   const router = useRouter()
   const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-
-    if (!name.trim()) {
-      setError('Round name is required')
-      return
-    }
 
     setIsSubmitting(true)
 
@@ -36,7 +30,7 @@ export function CreateRoundForm({ onSuccess }: CreateRoundFormProps) {
         },
         body: JSON.stringify({
           name: name.trim(),
-          description: description.trim() || undefined,
+          description: undefined,
         })
       })
 
@@ -65,7 +59,7 @@ export function CreateRoundForm({ onSuccess }: CreateRoundFormProps) {
       <CardHeader>
         <CardTitle>Create New TextRound</CardTitle>
         <CardDescription>
-          Start a new round where participants can send text updates.
+          Create a TextRound with an optional title, then start sending messages.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -78,7 +72,7 @@ export function CreateRoundForm({ onSuccess }: CreateRoundFormProps) {
 
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">
-              Round Name <span className="text-destructive">*</span>
+              Round Title (optional)
             </label>
             <input
               id="name"
@@ -88,22 +82,6 @@ export function CreateRoundForm({ onSuccess }: CreateRoundFormProps) {
               placeholder="e.g., Neighborhood Updates"
               disabled={isSubmitting}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description (optional)
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what this round is collecting..."
-              disabled={isSubmitting}
-              rows={3}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 

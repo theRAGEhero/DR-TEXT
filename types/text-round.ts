@@ -1,6 +1,6 @@
 export interface TextRound {
   id: string
-  name: string
+  name?: string
   description?: string
   created_at: string
   status: TextRoundStatus
@@ -14,6 +14,6 @@ export enum TextRoundStatus {
 }
 
 export interface CreateTextRoundInput {
-  name: string
+  name?: string
   description?: string
 }

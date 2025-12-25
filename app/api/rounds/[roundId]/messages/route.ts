@@ -65,9 +65,11 @@ export async function POST(
     await addMessage(params.roundId, message)
     const messages = await getMessages(params.roundId)
 
+    const generatedTitle = getGeneratedTitle(round, message.text)
     const updatedRound = await updateRound(params.roundId, {
       message_count: messages.length,
-      last_message_at: message.created_at
+      last_message_at: message.created_at,
+      name: generatedTitle
     })
 
     log.info('Message created successfully', { messageId: message.id })
@@ -80,4 +82,17 @@ export async function POST(
     log.error('Error creating message', { error })
     return NextResponse.json({ error: 'Failed to create message' }, { status: 500 })
   }
+}
+
+function getGeneratedTitle(round: { name?: string }, text: string) {
+  if (round.name && round.name.trim().length > 0) {
+    return round.name
+  }
+
+  const clean = text.replace(/\s+/g, ' ').trim()
+  if (!clean) return undefined
+
+  const sentenceBreak = clean.split(/[.!?]/)[0]
+  const snippet = sentenceBreak.length > 60 ? `${sentenceBreak.slice(0, 60).trim()}...` : sentenceBreak
+  return snippet
 }
